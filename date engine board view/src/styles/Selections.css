@@ -1,0 +1,31 @@
+#selections {
+  display: flex;
+  flex-direction: column;
+  width: 20vw;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+}
+
+.header {
+  text-align: left;
+  letter-spacing: -2px;
+
+  font-size: 17px;
+  color: #000000;
+}
+
+.content {
+  align-items: flex-start;
+}
+
+.sourceColumn,
+.numericColumn,
+.targetColumn {
+  margin-bottom: 15px;
+}
+
+.button {
+  padding-top: 10px;
+  text-align: right;
+}
