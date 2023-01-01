@@ -4,6 +4,7 @@
  */
 
 import React, { Component } from "react";
+import "./Selections.js";
 
 /**
  * Calculates a date

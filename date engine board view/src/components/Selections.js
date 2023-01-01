@@ -11,6 +11,7 @@ import "monday-ui-react-core/dist/main.css";
 import { manipulateDate } from "./DateChange";
 
 import Dropdown from "monday-ui-react-core/dist/Dropdown.js";
+import Checkbox from "monday-ui-react-core/dist/Checkbox.js";
 import Button from "monday-ui-react-core/dist/Button.js";
 
 const monday = mondaySdk();
@@ -24,6 +25,7 @@ const Selections = () => {
   const [dateColumnOpts, setDateColumnOpts] = useState();
   const [numericColumnOpts, setNumericColumnOpts] = useState();
   const [selections, setSelections] = useState([null, null, null]);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     monday.execute("valueCreatedForUser");
@@ -77,6 +79,7 @@ const Selections = () => {
    */
   const updateDates = () => {
     console.log("submit press", selections);
+    // for each item in board
     for (let i = 0; i < boardData.items.length; i++) {
       // get source date
       monday
@@ -91,18 +94,23 @@ const Selections = () => {
           }
         )
         .then((res) => {
-          let values = res.data.boards[0].items[0].column_values;
+          let date = res.data.boards[0].items[0].column_values[0].text;
+          let range = parseInt(
+            res.data.boards[0].items[0].column_values[1].text
+          );
 
-          if (values[1].text != "" && values[0].text != null) {
+          // if reverse direction, make range negative
+          if (checked) {
+            range *= -1;
+          }
+
+          if (date != "" && range != null) {
             monday.api(
               "mutation ($boardID: Int!, $itemID: Int!, $columnID: String!, $dateValue: JSON!) { change_column_value(board_id:$boardID, item_id: $itemID, column_id: $columnID, value: $dateValue) { id } }",
               {
                 variables: {
                   // dateValue: '{"date":"2022-07-02"}', // works
-                  dateValue:
-                    '{"date":"' +
-                    manipulateDate(values[0].text, parseInt(values[1].text)) +
-                    '"}',
+                  dateValue: '{"date":"' + manipulateDate(date, range) + '"}',
                   boardID: parseInt(boardData.id),
                   columnID: selections[2].value,
                   itemID: parseInt(boardData.items[i].id),
@@ -122,12 +130,12 @@ const Selections = () => {
       <div className="dropdowns">
         <Dropdown
           className="sourceColumn"
-          placeholder={"Select Date Source"}
+          placeholder={"Date Source"}
           noOptionsMessage={() => "No date columns found in the board."}
           size={Dropdown.size.MEDIUM}
           options={dateColumnOpts}
           // onOptionSelect={(e) => this.setBoardSelect(e)}
-          onOptionSelect={function noRefCheck(selection) {
+          onOptionSelect={function Selected(selection) {
             console.log("dropdown selected", selection);
             setSelections([selection, selections[1], selections[2]]);
           }}
@@ -135,11 +143,11 @@ const Selections = () => {
 
         <Dropdown
           className="numericColumn"
-          placeholder={"Select Number Source"}
+          placeholder={"Number Source"}
           noOptionsMessage={() => "No number columns found in the board."}
           size={Dropdown.size.MEDIUM}
           options={numericColumnOpts}
-          onOptionSelect={function noRefCheck(selection) {
+          onOptionSelect={function Selected(selection) {
             console.log("dropdown selected", selection);
             setSelections([selections[0], selection, selections[2]]);
           }}
@@ -148,11 +156,11 @@ const Selections = () => {
 
         <Dropdown
           className="targetColumn"
-          placeholder={"Select Target Date"}
+          placeholder={"Target Date"}
           noOptionsMessage={() => "No date columns found in the board."}
           size={Dropdown.size.MEDIUM}
           options={dateColumnOpts}
-          onOptionSelect={function noRefCheck(selection) {
+          onOptionSelect={function Selected(selection) {
             console.log("dropdown selected", selection);
             setSelections([selections[0], selections[1], selection]);
           }}
@@ -169,6 +177,15 @@ const Selections = () => {
       </div>
       <div className="content">
         {renderDropdowns()}
+        <div>
+          <Checkbox
+            default
+            label="Reverse Direction"
+            onChange={function Check() {
+              setChecked(!checked);
+            }}
+          />
+        </div>
         <div className="button">
           <Button
             className="button-submit"
