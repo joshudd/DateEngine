@@ -28,6 +28,7 @@ const Selections = () => {
   useEffect(() => {
     monday.execute("valueCreatedForUser");
 
+    // listen to context changes
     monday.listen("context", (res) => {
       setContext(res.data);
       console.log(res.data);
@@ -41,7 +42,7 @@ const Selections = () => {
         )
         .then((res) => {
           setBoardData(res.data.boards[0]);
-          console.log("query finish: ", res.data.boards);
+          console.log("query finish", res.data.boards);
           getOptions(res);
         });
     });
@@ -55,7 +56,7 @@ const Selections = () => {
     let dateArr = [];
     let numericArr = [];
     let options = res.data.boards[0].columns;
-    console.log("source column array", options, res);
+
     for (let i = 0; i < options.length; i++) {
       // type "lookup" for mirror support
       if (options[i].type === "date" || options[i].type === "lookup") {
@@ -77,7 +78,6 @@ const Selections = () => {
   const updateDates = () => {
     console.log("submit press", selections);
     for (let i = 0; i < boardData.items.length; i++) {
-      console.log(boardData.items[i]);
       // get source date
       monday
         .api(
@@ -92,7 +92,7 @@ const Selections = () => {
         )
         .then((res) => {
           let values = res.data.boards[0].items[0].column_values;
-          console.log("qu result", values);
+
           if (values[1].text != "" && values[0].text != null) {
             monday.api(
               "mutation ($boardID: Int!, $itemID: Int!, $columnID: String!, $dateValue: JSON!) { change_column_value(board_id:$boardID, item_id: $itemID, column_id: $columnID, value: $dateValue) { id } }",
@@ -101,7 +101,7 @@ const Selections = () => {
                   // dateValue: '{"date":"2022-07-02"}', // works
                   dateValue:
                     '{"date":"' +
-                    manipulateDate(values[0].text, values[1].text) +
+                    manipulateDate(values[0].text, parseInt(values[1].text)) +
                     '"}',
                   boardID: parseInt(boardData.id),
                   columnID: selections[2].value,
