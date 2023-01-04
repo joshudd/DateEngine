@@ -95,16 +95,18 @@ const Selections = () => {
         )
         .then((res) => {
           let date = res.data.boards[0].items[0].column_values[0].text;
-          let range = parseInt(
-            res.data.boards[0].items[0].column_values[1].text
-          );
+          let range = res.data.boards[0].items[0].column_values[1].text;
+          console.log("item", date, range, checked);
 
-          // if reverse direction, make range negative
-          if (checked) {
-            range *= -1;
-          }
+          if (date != "" && range != null && range != "") {
+            range = parseInt(range);
 
-          if (date != "" && range != null) {
+            // if reverse direction, make range negative
+            if (checked) {
+              range *= -1;
+            }
+            console.log("item passed", date, range, checked);
+
             monday.api(
               "mutation ($boardID: Int!, $itemID: Int!, $columnID: String!, $dateValue: JSON!) { change_column_value(board_id:$boardID, item_id: $itemID, column_id: $columnID, value: $dateValue) { id } }",
               {
